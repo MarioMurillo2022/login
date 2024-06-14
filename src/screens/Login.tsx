@@ -8,18 +8,21 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 
-const Login = () => {
+const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
 
-  const handleLogin = () => {
-    if (email === "user@example.com" && password === "password") {
+  const handleSubmit = async () => {
+    try {
+      const url = `http://192.168.1.19:3000/api/login/${email}/${password}`;
+      const response = await axios.get(url);
       navigation.navigate("Home");
-    } else {
-      Alert.alert("Error", "Correo electrónico o contraseña incorrectos");
+    } catch (error) {
+      Alert.alert("Error", "Credenciales incorrectas");
     }
   };
 
@@ -50,7 +53,7 @@ const Login = () => {
           secureTextEntry
           autoCapitalize="none"
         />
-        <Button color="#fff" title="Iniciar Sesión" onPress={handleLogin} />
+        <Button color="#fff" title="Iniciar Sesión" onPress={handleSubmit} />
       </View>
     </View>
   );
@@ -87,8 +90,8 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
+    borderColor: "gray",
+    borderWidth: 2,
     marginBottom: 12,
     paddingHorizontal: 10,
     borderRadius: 10,

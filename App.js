@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import * as SplashScreen from 'expo-splash-screen';
-import Login from './src/screens/Login';
-import Splash from './src/screens/Splash';
-import Home from './src/screens/Home';
+import React, { useState, useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import * as SplashScreen from "expo-splash-screen";
+
+import Login from "./src/screens/Login";
+import Splash from "./src/screens/Splash";
+import Home from "./src/screens/Home";
 
 const Stack = createNativeStackNavigator();
 
@@ -14,18 +15,15 @@ const App = () => {
   useEffect(() => {
     const loadResourcesAndDataAsync = async () => {
       try {
-
         await SplashScreen.preventAutoHideAsync();
-
         setTimeout(() => {
           setIsLoading(false);
           SplashScreen.hideAsync();
-        }, 1000); // 
+        }, 1000); //
       } catch (e) {
         console.warn(e);
       }
     };
-
     loadResourcesAndDataAsync();
   }, []);
 

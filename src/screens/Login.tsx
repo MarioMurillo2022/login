@@ -10,15 +10,15 @@ import {
 } from "react-native";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
+import { API_URL } from "@env";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // const navigation = useNavigation();
 
   const handleSubmit = async () => {
     try {
-      const url = `http://192.168.1.19:3000/api/login/${email}/${password}`;
+      const url = `${API_URL}api/login/${email}/${password}`;
       const response = await axios.get(url);
       navigation.navigate("Home");
     } catch (error) {

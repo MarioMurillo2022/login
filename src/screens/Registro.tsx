@@ -32,7 +32,6 @@ export default function Registro() {
     try {
       setLoading(true);
       const url = `${API_URL}api/registro`;
-      // const response = await axios.get(url);
       await axios.post(url, {
         correo: email,
         pass: password,
@@ -42,6 +41,7 @@ export default function Registro() {
       navigation.navigate("Login");
     } catch (error) {
       Alert.alert("Error", "No se registró ningún usuario.");
+      setLoading(false);
     } finally {
       setLoading(false);
     }

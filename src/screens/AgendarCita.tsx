@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { View, ScrollView, Alert, StyleSheet } from "react-native";
+import {
+  View,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
+import axios from "axios";
+import { API_URL } from "@env";
 import {
   Card,
   Button,
@@ -16,11 +24,15 @@ import baberia1 from "../assets/BaberShopDef.jpg";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"; // Importa el ícono que desees usar
 import { styles } from "../styles/Agenda";
 
-const AgendarCita = ({ navigation }) => {
+export default function AgendarCita() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [barber, setBarber] = useState("");
+  const [barberName, setBarberName] = useState("");
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [optionsBarberias, setOptionsBarberias] = useState([]);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedBarberia, setSelectedBarberia] = useState(null);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
@@ -43,45 +55,75 @@ const AgendarCita = ({ navigation }) => {
     setBarber("");
   };
 
+  const formatDate = (dateString, formatType) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    if ((formatType = "YYYYMMDD")) {
+      return `${year}-${month}-${day}`;
+    } else {
+      return `${day}-${month}-${year}`;
+    }
+  };
+
+  const formatTime = (timeString) => {
+    const date = new Date(timeString);
+    const hour = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes() + 1).padStart(2, "0");
+    return `${hour}:${minutes}`;
+  };
+
   const handleConfirmDate = (selectedDate) => {
-    setDate(selectedDate.toLocaleDateString());
+    setDate(formatDate(selectedDate, "YYYYMMDD"));
     setDatePickerVisible(false);
   };
 
   const handleConfirmTime = (selectedTime) => {
-    setTime(
-      selectedTime.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    );
+    setTime(formatTime(selectedTime));
     setTimePickerVisible(false);
   };
 
-  const handleSelectBarber = (selectedBarber) => {
-    setBarber(selectedBarber);
+  const handleSelectBarber = (idBarber, selectedBarber) => {
+    setBarber(idBarber);
+    setBarberName(selectedBarber);
     setBarberAccordionExpanded(false);
   };
 
-  const handleCreateAppointment = () => {
+  const handleCreateAppointment = async () => {
     if (!date || !time || !barber) {
       Alert.alert("Error", "Por favor, completa todos los campos.");
       return;
     }
 
-    const newAppointment = {
-      barberia: selectedBarberia,
-      barber: barber,
-      date: date,
-      time: time,
-    };
+    try {
+      setLoading(true);
+      const url = `${API_URL}api/agenda`;
+      await axios.post(url, {
+        fecha: date,
+        tiempo: time,
+        id_Barbero: barber,
+      });
 
-    setAppointments([...appointments, newAppointment]);
-    closeModal();
-    Alert.alert(
-      "Cita agendada",
-      `Has agendado una cita en ${selectedBarberia} con ${barber} el ${date} a las ${time}`
-    );
+      const newAppointment = {
+        barberia: selectedBarberia,
+        barber: barberName,
+        date: date,
+        time: time,
+      };
+
+      setAppointments([...appointments, newAppointment]);
+      closeModal();
+      Alert.alert(
+        "Cita agendada",
+        `Has agendado una cita en ${selectedBarberia} con ${barber} el ${date} a las ${time}`
+      );
+    } catch (error) {
+      Alert.alert("Error", "No se registró ninguna cita.");
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -189,24 +231,36 @@ const AgendarCita = ({ navigation }) => {
               )}
             >
               <List.Item
-                title="Eduardo"
-                onPress={() => handleSelectBarber("Eduardo")}
+                title="Luis"
+                onPress={() => handleSelectBarber(1, "Luis")}
               />
               <List.Item
                 title="Mario"
-                onPress={() => handleSelectBarber("Mario")}
+                onPress={() => handleSelectBarber(2, "Mario")}
               />
               <List.Item
-                title="Luis"
-                onPress={() => handleSelectBarber("Luis")}
+                title="Eduardo"
+                onPress={() => handleSelectBarber(3, "Eduardo")}
               />
             </List.Accordion>
             <TextInput
               label="Barbero seleccionado"
-              value={barber}
+              value={barberName}
               style={styles.input}
               disabled
             />
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleCreateAppointment}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Confirmar Cita</Text>
+              )}
+            </TouchableOpacity>
             <Button
               mode="contained"
               onPress={handleCreateAppointment}
@@ -232,6 +286,4 @@ const AgendarCita = ({ navigation }) => {
       </ScrollView>
     </Provider>
   );
-};
-
-export default AgendarCita;
+}

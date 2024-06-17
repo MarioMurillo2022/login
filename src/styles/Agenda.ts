@@ -23,6 +23,11 @@ export const styles = StyleSheet.create({
     button: {
         marginTop: 10,
     },
+    buttonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
     title: {
         fontSize: 20,
         marginBottom: 10,

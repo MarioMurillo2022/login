@@ -4,25 +4,39 @@ import {
   Text,
   Image,
   TextInput,
-  Button,
   StyleSheet,
   Alert,
+  ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import { API_URL } from "@env";
 
-const Login = ({ navigation }) => {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
 
   const handleSubmit = async () => {
+    if (!email || !password) {
+      Alert.alert(
+        "Error",
+        "Por favor ingrese su correo electrónico y contraseña."
+      );
+      return;
+    }
     try {
+      setLoading(true);
       const url = `${API_URL}api/login/${email}/${password}`;
       const response = await axios.get(url);
-      navigation.navigate("Home");
+      Alert.alert("", "Bienvenido");
+      navigation.navigate("Agenda");
     } catch (error) {
       Alert.alert("Error", "Credenciales incorrectas");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,7 +67,29 @@ const Login = ({ navigation }) => {
           secureTextEntry
           autoCapitalize="none"
         />
-        <Button color="#fff" title="Iniciar Sesión" onPress={handleSubmit} />
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Iniciar Sesión</Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.buttonRegistrarse}
+          onPress={() => navigation.navigate("Registro")}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Registrarse</Text>
+          )}
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -96,6 +132,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 10,
     backgroundColor: "#fff",
+  },
+  button: {
+    height: 40,
+    backgroundColor: "#0066cc",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  buttonRegistrarse: {
+    marginTop: 100,
+    height: 40,
+    backgroundColor: "#192a57",
+    borderColor: "gray",
+    borderWidth: 2,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
   },
 });
 

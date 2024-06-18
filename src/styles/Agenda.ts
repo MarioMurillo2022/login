@@ -46,4 +46,8 @@ export const styles = StyleSheet.create({
     separator: {
         height: 5,
     },
+    picker: {
+        height: 50,
+        width: '100%',
+    },
 });

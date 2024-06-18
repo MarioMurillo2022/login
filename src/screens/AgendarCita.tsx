@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   ScrollView,
@@ -20,6 +20,7 @@ import {
   List,
 } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { Picker } from "@react-native-picker/picker";
 import baberia1 from "../assets/BaberShopDef.jpg";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"; // Importa el ícono que desees usar
 import { styles } from "../styles/Agenda";
@@ -39,6 +40,10 @@ export default function AgendarCita() {
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [barberAccordionExpanded, setBarberAccordionExpanded] = useState(true); // Mantener siempre visible
   const [appointments, setAppointments] = useState([]); // Estado para almacenar las citas agendadas
+
+  useEffect(() => {
+    obtenerBarberos();
+  }, []);
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
@@ -72,6 +77,24 @@ export default function AgendarCita() {
     const hour = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes() + 1).padStart(2, "0");
     return `${hour}:${minutes}`;
+  };
+
+  const obtenerBarberos = async () => {
+    try {
+      const response = await axios.get(`${API_URL}api/datos`);
+      setOptionsBarberias(response.data);
+    } catch (error) {
+      console.error("Error al obtener registros:", error);
+    }
+  };
+
+  const obtenerCitasProgramadas = async () => {
+    try {
+      const response = await axios.get(`${API_URL}api/datos`);
+      setOptionsBarberias(response.data);
+    } catch (error) {
+      console.error("Error al obtener registros:", error);
+    }
   };
 
   const handleConfirmDate = (selectedDate) => {
@@ -148,7 +171,6 @@ export default function AgendarCita() {
           </List.Accordion>
         </View>
 
-        {/* Espacio entre citas agendadas y las tarjetas de barberías */}
         <View style={styles.separator} />
 
         <View style={styles.container}>
@@ -216,6 +238,7 @@ export default function AgendarCita() {
               style={styles.input}
               disabled
             />
+
             <List.Accordion
               title="Seleccionar Barbero"
               expanded={barberAccordionExpanded}
@@ -230,18 +253,13 @@ export default function AgendarCita() {
                 />
               )}
             >
-              <List.Item
-                title="Luis"
-                onPress={() => handleSelectBarber(1, "Luis")}
-              />
-              <List.Item
-                title="Mario"
-                onPress={() => handleSelectBarber(2, "Mario")}
-              />
-              <List.Item
-                title="Eduardo"
-                onPress={() => handleSelectBarber(3, "Eduardo")}
-              />
+              {optionsBarberias.map((option) => (
+                <List.Item
+                  key={option.id}
+                  onPress={() => handleSelectBarber(option.id, option.nombre)}
+                  title={option.nombre}
+                />
+              ))}
             </List.Accordion>
             <TextInput
               label="Barbero seleccionado"
@@ -250,17 +268,6 @@ export default function AgendarCita() {
               disabled
             />
 
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleCreateAppointment}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Confirmar Cita</Text>
-              )}
-            </TouchableOpacity>
             <Button
               mode="contained"
               onPress={handleCreateAppointment}
